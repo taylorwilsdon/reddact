@@ -2,7 +2,6 @@
 
 const { program } = require('commander');
 const puppeteer = require('puppeteer');
-const { execSync } = require('child_process');
 const path = require('path');
 
 program
@@ -18,25 +17,10 @@ program.parse();
 const options = program.opts();
 
 async function main() {
-  // Launch Chrome with debugging port
-  try {
-    execSync('"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222', {
-      stdio: 'ignore'
-    });
-  } catch (err) {
-    console.log('Chrome already running with debug port, continuing...');
-  }
-
-  // Give Chrome a moment to start up
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  // Connect to Chrome instance
-  const browser = await puppeteer.connect({
-    browserURL: 'http://localhost:9222',
+  // Launch Chrome normally
+  const browser = await puppeteer.launch({
+    headless: false,
     defaultViewport: null
-  }).catch(err => {
-    console.error('Failed to connect to Chrome. Please ensure Chrome is running with --remote-debugging-port=9222');
-    process.exit(1);
   });
 
   const page = await browser.newPage();
