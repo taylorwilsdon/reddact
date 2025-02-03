@@ -19,6 +19,8 @@ program
 program.parse();
 const options = program.opts();
 
+let browser;
+
 async function main() {
   const userDataDir = options.profile || path.join(process.env.HOME, '.config', 'reddit-delete');
   
@@ -26,7 +28,7 @@ async function main() {
     fs.mkdirSync(userDataDir, { recursive: true });
   }
 
-  global.browser = await puppeteer.launch({
+  browser = await puppeteer.launch({
     headless: options.headless ? 'new' : false,
     userDataDir,
     args: [
@@ -88,27 +90,44 @@ async function main() {
     console.log('Browser window opened. Close it manually when done.');
     await new Promise(() => {}); // Keep process alive
   } else {
-    await global.browser.close();
+    await browser.close();
+  }
+}
+
+// Handle cleanup
+async function cleanup() {
+  if (browser) {
+    try {
+      await browser.close();
+    } catch (e) {
+      console.error('Error while closing browser:', e);
+    }
+    browser = null;
   }
 }
 
 main().catch(async error => {
   console.error('Fatal error:', error);
-  try {
-    if (global.browser) await global.browser.close();
-  } catch (e) {
-    console.error('Error while closing browser:', e);
-  }
+  await cleanup();
   process.exit(1);
 });
 
 // Handle process termination
 process.on('SIGINT', async () => {
   console.log('\nGracefully shutting down...');
-  try {
-    if (global.browser) await global.browser.close();
-  } catch (e) {
-    console.error('Error while closing browser:', e);
-  }
+  await cleanup();
   process.exit(0);
+});
+
+// Handle other termination signals
+process.on('SIGTERM', async () => {
+  console.log('\nReceived SIGTERM. Shutting down...');
+  await cleanup();
+  process.exit(0);
+});
+
+process.on('uncaughtException', async (error) => {
+  console.error('Uncaught exception:', error);
+  await cleanup();
+  process.exit(1);
 });
