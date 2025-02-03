@@ -26,7 +26,7 @@ async function main() {
     fs.mkdirSync(userDataDir, { recursive: true });
   }
 
-  const browser = await puppeteer.launch({
+  global.browser = await puppeteer.launch({
     headless: options.headless ? 'new' : false,
     userDataDir,
     args: [
@@ -44,7 +44,7 @@ async function main() {
 
   let page;
   try {
-    page = await browser.newPage();
+    page = await global.browser.newPage();
     await page.setDefaultNavigationTimeout(60000); // 60 second timeout
     
     // First ensure we're logged in
@@ -88,7 +88,7 @@ async function main() {
     console.log('Browser window opened. Close it manually when done.');
     await new Promise(() => {}); // Keep process alive
   } else {
-    await browser.close();
+    await global.browser.close();
   }
 }
 
