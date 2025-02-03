@@ -1,0 +1,16 @@
+{
+  "name": "reddit-delete",
+  "version": "1.4.11",
+  "description": "Reddit content deletion tool with PII detection",
+  "main": "cli.js",
+  "bin": {
+    "reddit-delete": "./cli.js"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "puppeteer": "^21.7.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
