@@ -219,6 +219,12 @@ var pd = {
         $("#pd__form").show();
         pd.setup.basicSettings();
         pd.setup.applyDom();
+        pd.llmService = new LLMService({
+          endpoint: localStorage.getItem('pd_llm_endpoint') || 'http://localhost:11434/api/generate',
+          model: localStorage.getItem('pd_llm_model') || 'mistral',
+          apiKey: localStorage.getItem('pd_llm_apikey') || '',
+          isOllama: localStorage.getItem('pd_llm_type') !== 'openai'
+        });
       } else {
         if (
           confirm(
@@ -368,6 +374,39 @@ var pd = {
       );
     },
     applySubList: function () {
+      // Add LLM settings section before subreddit list
+      $("#pd__sub-list").before(`
+        <div class="xtr-section">
+          <h3>LLM Settings for PII Detection</h3>
+          <div>
+            <input type="checkbox" id="pd__pii_check" name="pd__pii_check"/>
+            <label for="pd__pii_check">Filter items containing PII</label>
+          </div>
+          <div>
+            <label for="pd__llm_type">LLM Service:</label>
+            <select id="pd__llm_type" name="pd__llm_type">
+              <option value="ollama">Ollama</option>
+              <option value="openai">OpenAI Compatible</option>
+            </select>
+          </div>
+          <div>
+            <label for="pd__llm_endpoint">Endpoint URL:</label>
+            <input type="text" id="pd__llm_endpoint" name="pd__llm_endpoint" 
+              value="${localStorage.getItem('pd_llm_endpoint') || 'http://localhost:11434/api/generate'}"/>
+          </div>
+          <div>
+            <label for="pd__llm_model">Model Name:</label>
+            <input type="text" id="pd__llm_model" name="pd__llm_model" 
+              value="${localStorage.getItem('pd_llm_model') || 'mistral'}"/>
+          </div>
+          <div>
+            <label for="pd__llm_apikey">API Key (if needed):</label>
+            <input type="password" id="pd__llm_apikey" name="pd__llm_apikey" 
+              value="${localStorage.getItem('pd_llm_apikey') || ''}"/>
+          </div>
+        </div>
+      `);
+
       var sub_arr = [],
         i,
         sid;
@@ -578,7 +617,7 @@ var pd = {
       }
       return { valid: true, reason: "valid" };
     },
-    shouldBeActedOn: function (item) {
+    shouldBeActedOn: async function (item) {
       var check = {
         subs:
           !pd.filters.subs.enabled ||
@@ -587,6 +626,7 @@ var pd = {
         gold: !(pd.filters.gilded && item.data.gilded == 1),
         saved: !(pd.filters.saved && item.data.saved == true),
         mod: !(pd.filters.mod && item.data.distinguished != null),
+        pii: true,
         score:
           !pd.filters.score.enabled ||
           (pd.filters.score.enabled &&
@@ -654,6 +694,12 @@ var pd = {
           "pd_storage",
           JSON.stringify($("#pd__form").serializeArray())
         );
+        
+        // Save LLM settings separately
+        localStorage.setItem('pd_llm_endpoint', $("#pd__llm_endpoint").val());
+        localStorage.setItem('pd_llm_model', $("#pd__llm_model").val());
+        localStorage.setItem('pd_llm_apikey', $("#pd__llm_apikey").val());
+        localStorage.setItem('pd_llm_type', $("#pd__llm_type").val());
       } else {
         localStorage.removeItem("pd_storage");
       }
@@ -770,10 +816,21 @@ var pd = {
           pd.actions.page.next();
         }
       },
-      handleSingle: function () {
+      handleSingle: async function () {
         pd.ui.updateDisplay();
-        var item = pd.task.items[0],
-          shouldBeActedOn = pd.helpers.shouldBeActedOn(item),
+        var item = pd.task.items[0];
+        
+        // Perform PII check if enabled
+        if ($("#pd__pii_check").is(":checked")) {
+          const text = item.data.body || item.data.selftext || item.data.title || '';
+          const piiAnalysis = await pd.llmService.analyzePII(text);
+          item.piiAnalysis = piiAnalysis;
+          if (piiAnalysis.hasPII) {
+            pd.task.info.ignoreReasons.pii = (pd.task.info.ignoreReasons.pii || 0) + 1;
+          }
+        }
+        
+        const shouldBeActedOn = await pd.helpers.shouldBeActedOn(item);
           earlyExitNewItems =
             pd.task.paths.sorts[0] == "new" &&
             pd.filters.date.gt === true &&
