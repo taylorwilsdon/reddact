@@ -2,6 +2,7 @@
 
 const { program } = require('commander');
 const puppeteer = require('puppeteer');
+const { execSync } = require('child_process');
 
 program
   .name('reddit-delete')
@@ -16,8 +17,13 @@ program.parse();
 const options = program.opts();
 
 async function main() {
-  const browser = await puppeteer.launch({ 
-    headless: false,
+  // Get Chrome debugging port
+  const chromeDebugPort = execSync('lsof -i :9222 | grep LISTEN').toString().trim() || 
+    execSync('"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222').toString();
+
+  // Connect to existing Chrome instance
+  const browser = await puppeteer.connect({ 
+    browserURL: 'http://localhost:9222',
     defaultViewport: null
   });
 
