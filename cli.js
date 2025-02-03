@@ -17,10 +17,11 @@ program.parse();
 const options = program.opts();
 
 async function main() {
-  // Connect to existing Chrome instance
-  const browser = await puppeteer.connect({
-    browserWSEndpoint: 'ws://127.0.0.1:9222/devtools/browser',
-    defaultViewport: null
+  // Launch Chrome
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: null,
+    args: ['--start-maximized']
   });
 
   const page = await browser.newPage();
