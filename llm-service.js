@@ -71,7 +71,7 @@ class LLMService {
       };
     }
   }
-}
+
   async analyzeBatch(texts) {
     const batches = [];
     for (let i = 0; i < texts.length; i += this.batchSize) {
@@ -90,3 +90,4 @@ class LLMService {
   meetsConfidenceThreshold(analysis) {
     return analysis.confidence >= this.confidenceThreshold;
   }
+}
