@@ -27,15 +27,30 @@ async function main() {
   }
 
   const browser = await puppeteer.launch({
-    headless: options.headless,
+    headless: options.headless ? 'new' : false,
     userDataDir,
-    args: ['--no-sandbox']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu'
+    ],
+    ignoreHTTPSErrors: true
+  }).catch(error => {
+    console.error('Failed to launch browser:', error.message);
+    process.exit(1);
   });
 
-  const page = await browser.newPage();
-  
-  // First ensure we're logged in
-  await page.goto('https://old.reddit.com/login');
+  let page;
+  try {
+    page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(60000); // 60 second timeout
+    
+    // First ensure we're logged in
+    await page.goto('https://old.reddit.com/login', {
+      waitUntil: 'networkidle0'
+    });
   
   // Wait for either login form or already logged in state
   await page.waitForSelector('#login-form, .user');
@@ -77,4 +92,23 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main().catch(async error => {
+  console.error('Fatal error:', error);
+  try {
+    if (global.browser) await global.browser.close();
+  } catch (e) {
+    console.error('Error while closing browser:', e);
+  }
+  process.exit(1);
+});
+
+// Handle process termination
+process.on('SIGINT', async () => {
+  console.log('\nGracefully shutting down...');
+  try {
+    if (global.browser) await global.browser.close();
+  } catch (e) {
+    console.error('Error while closing browser:', e);
+  }
+  process.exit(0);
+});
