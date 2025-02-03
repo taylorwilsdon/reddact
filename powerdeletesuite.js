@@ -385,6 +385,10 @@ var pd = {
             <input type="checkbox" id="pd__pii_check" name="pd__pii_check"/>
             <label for="pd__pii_check">Filter items containing PII</label>
           </div>
+          <div class="warning-section">
+            <input type="checkbox" id="pd__confirm_delete" name="pd__confirm_delete"/>
+            <label for="pd__confirm_delete" style="color: #ff4444;">I understand that deleted content CANNOT be recovered</label>
+          </div>
           <div>
             <label for="pd__llm_type">LLM Service:</label>
             <select id="pd__llm_type" name="pd__llm_type">
@@ -566,6 +570,14 @@ var pd = {
         var validation = pd.helpers.validate();
         window.pd_processing = validation.valid;
         if (validation.valid) {
+          if (pd.task.config.isRemovingPosts || pd.task.config.isRemovingComments) {
+            const confirmStart = window.confirm(
+              "You are about to permanently delete content from your Reddit account. This action cannot be undone. Continue?"
+            );
+            if (!confirmStart) {
+              return;
+            }
+          }
           $("#pd__central .complete, #pd__form").hide();
           $("#pd__central .processing").show();
           pd.actions.page.next();
@@ -609,6 +621,13 @@ var pd = {
   },
   helpers: {
     validate: function () {
+      if ((pd.task.config.isRemovingPosts || pd.task.config.isRemovingComments) && 
+          !$("#pd__confirm_delete").is(":checked")) {
+        return {
+          valid: false,
+          reason: "You must confirm that you understand deleted content cannot be recovered by checking the confirmation box."
+        };
+      }
       if (pd.task.config.isEditing && pd.task.config.editText === "") {
         var confirmEmptyEdit = window.confirm(
           "You have not entered any text to edit your posts to; junk text will be used instead."
