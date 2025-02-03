@@ -17,9 +17,9 @@ program.parse();
 const options = program.opts();
 
 async function main() {
-  // Launch Chrome normally
-  const browser = await puppeteer.launch({
-    headless: false,
+  // Connect to existing Chrome instance
+  const browser = await puppeteer.connect({
+    browserWSEndpoint: 'ws://127.0.0.1:9222/devtools/browser',
     defaultViewport: null
   });
 
