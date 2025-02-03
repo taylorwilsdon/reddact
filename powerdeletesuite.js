@@ -223,7 +223,10 @@ var pd = {
           endpoint: localStorage.getItem('pd_llm_endpoint') || 'http://localhost:11434/api/generate',
           model: localStorage.getItem('pd_llm_model') || 'mistral',
           apiKey: localStorage.getItem('pd_llm_apikey') || '',
-          isOllama: localStorage.getItem('pd_llm_type') !== 'openai'
+          isOllama: localStorage.getItem('pd_llm_type') !== 'openai',
+          confidenceThreshold: parseFloat(localStorage.getItem('pd_llm_confidence') || '0.7'),
+          batchSize: parseInt(localStorage.getItem('pd_llm_batch') || '5'),
+          customPrompt: localStorage.getItem('pd_llm_prompt') || ''
         });
       } else {
         if (
@@ -403,6 +406,23 @@ var pd = {
             <label for="pd__llm_apikey">API Key (if needed):</label>
             <input type="password" id="pd__llm_apikey" name="pd__llm_apikey" 
               value="${localStorage.getItem('pd_llm_apikey') || ''}"/>
+          </div>
+          <div>
+            <label for="pd__llm_confidence">Confidence Threshold (0-1):</label>
+            <input type="number" id="pd__llm_confidence" name="pd__llm_confidence" 
+              min="0" max="1" step="0.1"
+              value="${localStorage.getItem('pd_llm_confidence') || '0.7'}"/>
+          </div>
+          <div>
+            <label for="pd__llm_batch">Batch Size:</label>
+            <input type="number" id="pd__llm_batch" name="pd__llm_batch" 
+              min="1" max="10" step="1"
+              value="${localStorage.getItem('pd_llm_batch') || '5'}"/>
+          </div>
+          <div>
+            <label for="pd__llm_prompt">Custom Prompt (optional):</label>
+            <textarea id="pd__llm_prompt" name="pd__llm_prompt" 
+              rows="3">${localStorage.getItem('pd_llm_prompt') || ''}</textarea>
           </div>
         </div>
       `);
@@ -700,6 +720,9 @@ var pd = {
         localStorage.setItem('pd_llm_model', $("#pd__llm_model").val());
         localStorage.setItem('pd_llm_apikey', $("#pd__llm_apikey").val());
         localStorage.setItem('pd_llm_type', $("#pd__llm_type").val());
+        localStorage.setItem('pd_llm_confidence', $("#pd__llm_confidence").val());
+        localStorage.setItem('pd_llm_batch', $("#pd__llm_batch").val());
+        localStorage.setItem('pd_llm_prompt', $("#pd__llm_prompt").val());
       } else {
         localStorage.removeItem("pd_storage");
       }
@@ -827,6 +850,28 @@ var pd = {
           item.piiAnalysis = piiAnalysis;
           if (piiAnalysis.hasPII) {
             pd.task.info.ignoreReasons.pii = (pd.task.info.ignoreReasons.pii || 0) + 1;
+            // Add detailed PII info to the UI
+            if (!pd.task.info.piiDetails) pd.task.info.piiDetails = [];
+            pd.task.info.piiDetails.push({
+              text: text.substring(0, 100) + '...',
+              analysis: piiAnalysis
+            });
+            // Update PII details display
+            const detailsDiv = $('.progress__byline .ignored .pii-details');
+            if (detailsDiv.length === 0) {
+              $('.progress__byline .ignored').append('<div class="pii-details"><h4>PII Details:</h4></div>');
+            }
+            $('.progress__byline .ignored .pii-details').html(
+              '<h4>PII Details:</h4>' +
+              pd.task.info.piiDetails.map(detail => 
+                `<div class="pii-item">
+                  <div class="text">${detail.text}</div>
+                  <div class="categories">Categories: ${detail.analysis.categories?.join(', ') || 'None'}</div>
+                  <div class="confidence">Confidence: ${(detail.analysis.confidence * 100).toFixed(1)}%</div>
+                  <div class="details">${detail.analysis.details}</div>
+                </div>`
+              ).join('')
+            );
           }
         }
         
