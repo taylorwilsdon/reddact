@@ -6,6 +6,15 @@
   "bin": {
     "reddit-delete": "./cli.js"
   },
+  "scripts": {
+    "format": "npm run format:trailing && npm run format:final-newline",
+    "format:trailing": "find . -type f -name '*.js' -exec sed -i '' -e 's/[[:space:]]*$//' {} +",
+    "format:final-newline": "find . -type f -name '*.js' -exec sh -c '[ -n \"$(tail -c1 \"{}\")\" ] && echo >> \"{}\"' \\;",
+    "lint": "npm run lint:trailing && npm run lint:final-newline && npm run lint:console",
+    "lint:trailing": "! find . -type f -name '*.js' -exec grep -l '[[:space:]]$' {} +",
+    "lint:final-newline": "! find . -type f -name '*.js' -exec sh -c '[ -n \"$(tail -c1 \"{}\")\" ]' \\;",
+    "lint:console": "! find . -type f -name '*.js' ! -name 'cli.js' -exec grep -l 'console\\.log' {} +"
+  },
   "dependencies": {
     "commander": "^11.1.0",
     "puppeteer": "^21.7.0"
