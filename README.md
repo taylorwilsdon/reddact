@@ -5,7 +5,10 @@
 
 **Next-generation anonymous content management with neural privacy protection**
 
-## Why Choose reddact?
+## What is reddact?
+- Clean up your online footprint without blowing away everyything and perform sentiment analysis to identify comments that are likely to reveal PII that you may not want correlated with your anonymous username.
+- Easy, lazy, self hosted - the way an aging former engineer with a career doing things right at the enterprise cale would clean up your dirty laundry   
+
 ✅ **Zero-Trust Architecture**  
 - Client-side execution only
 - No tracking or external calls
