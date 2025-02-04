@@ -139,7 +139,7 @@ Join our subreddit: [r/reddacted](https://reddit.com/r/reddacted)
 
 ## FAQ
 **Q:** How does the AI handle false positives?  
-**A:** Adjust confidence threshold (default 0.7) per risk tolerance.
+**A:** Adjust confidence threshold (default 0.7) per risk tolerance. You're building a repo from source off some random dude's github - don't run this and just delete a bunch of shit blindly, you're a smart person. Review your results, and if it is doing something crazy, please tell me. 
 
 **Q:** What LLMs are supported?  
 **A:** Local: any model via Ollama, vLLM or other platform capable of exposing an openai-compatible endpoint. • Cloud: OpenAI-compatible endpoints
