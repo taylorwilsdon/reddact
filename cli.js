@@ -25,15 +25,15 @@ async function main() {
   });
 
   const page = await browser.newPage();
-  
+
   // First ensure we're logged in
   await page.goto('https://old.reddit.com/login');
-  
+
   // Wait for either login form or already logged in state
   await page.waitForSelector('#login-form, .user');
-  
+
   const isLoggedIn = await page.$('.user') !== null;
-  
+
   if (!isLoggedIn) {
     console.log('Please log in to Reddit in the opened browser window');
     await page.waitForSelector('.user', { timeout: 300000 }); // 5 min timeout for login

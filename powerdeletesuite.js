@@ -398,34 +398,34 @@ var pd = {
           </div>
           <div>
             <label for="pd__llm_endpoint">Endpoint URL:</label>
-            <input type="text" id="pd__llm_endpoint" name="pd__llm_endpoint" 
+            <input type="text" id="pd__llm_endpoint" name="pd__llm_endpoint"
               value="${localStorage.getItem('pd_llm_endpoint') || 'http://localhost:11434/api/generate'}"/>
           </div>
           <div>
             <label for="pd__llm_model">Model Name:</label>
-            <input type="text" id="pd__llm_model" name="pd__llm_model" 
+            <input type="text" id="pd__llm_model" name="pd__llm_model"
               value="${localStorage.getItem('pd_llm_model') || 'mistral'}"/>
           </div>
           <div>
             <label for="pd__llm_apikey">API Key (if needed):</label>
-            <input type="password" id="pd__llm_apikey" name="pd__llm_apikey" 
+            <input type="password" id="pd__llm_apikey" name="pd__llm_apikey"
               value="${localStorage.getItem('pd_llm_apikey') || ''}"/>
           </div>
           <div>
             <label for="pd__llm_confidence">Confidence Threshold (0-1):</label>
-            <input type="number" id="pd__llm_confidence" name="pd__llm_confidence" 
+            <input type="number" id="pd__llm_confidence" name="pd__llm_confidence"
               min="0" max="1" step="0.1"
               value="${localStorage.getItem('pd_llm_confidence') || '0.7'}"/>
           </div>
           <div>
             <label for="pd__llm_batch">Batch Size:</label>
-            <input type="number" id="pd__llm_batch" name="pd__llm_batch" 
+            <input type="number" id="pd__llm_batch" name="pd__llm_batch"
               min="1" max="10" step="1"
               value="${localStorage.getItem('pd_llm_batch') || '5'}"/>
           </div>
           <div>
             <label for="pd__llm_prompt">Custom Prompt (optional):</label>
-            <textarea id="pd__llm_prompt" name="pd__llm_prompt" 
+            <textarea id="pd__llm_prompt" name="pd__llm_prompt"
               rows="3">${localStorage.getItem('pd_llm_prompt') || ''}</textarea>
           </div>
         </div>
@@ -621,7 +621,7 @@ var pd = {
   },
   helpers: {
     validate: function () {
-      if ((pd.task.config.isRemovingPosts || pd.task.config.isRemovingComments) && 
+      if ((pd.task.config.isRemovingPosts || pd.task.config.isRemovingComments) &&
           !$("#pd__confirm_delete").is(":checked")) {
         return {
           valid: false,
@@ -733,7 +733,7 @@ var pd = {
           "pd_storage",
           JSON.stringify($("#pd__form").serializeArray())
         );
-        
+
         // Save LLM settings separately
         localStorage.setItem('pd_llm_endpoint', $("#pd__llm_endpoint").val());
         localStorage.setItem('pd_llm_model', $("#pd__llm_model").val());
@@ -861,7 +861,7 @@ var pd = {
       handleSingle: async function () {
         pd.ui.updateDisplay();
         var item = pd.task.items[0];
-        
+
         // Perform PII check if enabled
         if ($("#pd__pii_check").is(":checked")) {
           const text = item.data.body || item.data.selftext || item.data.title || '';
@@ -882,7 +882,7 @@ var pd = {
             }
             $('.progress__byline .ignored .pii-details').html(
               '<h4>PII Details:</h4>' +
-              pd.task.info.piiDetails.map(detail => 
+              pd.task.info.piiDetails.map(detail =>
                 `<div class="pii-item">
                   <div class="text">${detail.text}</div>
                   <div class="categories">Categories: ${detail.analysis.categories?.join(', ') || 'None'}</div>
@@ -893,7 +893,7 @@ var pd = {
             );
           }
         }
-        
+
         const shouldBeActedOn = await pd.helpers.shouldBeActedOn(item);
           earlyExitNewItems =
             pd.task.paths.sorts[0] == "new" &&

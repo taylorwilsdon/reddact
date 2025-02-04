@@ -18,7 +18,7 @@ class LLMService {
     - Contact information
     - References to relationships or connections
     - Unique characteristics or identifiers
-    
+
     Respond with a JSON object containing:
     1. "hasPII": boolean indicating if PII was found
     2. "confidence": number 0-1 indicating confidence in the assessment
