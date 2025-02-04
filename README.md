@@ -10,6 +10,7 @@
 - Client-side execution only
 - No tracking or external calls
 - Session-based authentication
+- Keep your nonsense comments without unintentionally doxing yourself someday off in the future when you run for mayor. 
 
 🤖 **Advanced AI Detection**  
 - Multi-layer PII analysis using `${model}`:
@@ -56,6 +57,40 @@ graph TD
     F --> G[Confidence Threshold Check]
     G --> H[Action Recommendations]
 ```
+
+## Development Workflow
+
+### Automated Code Quality Hooks
+
+**Formatting**  
+```bash
+npm run format
+```
+Applies consistent code styling using Prettier. Formats:
+- All JavaScript/TypeScript files in `/src`
+- Configuration files (.json, .yml)
+- Markdown documentation
+
+**Linting**  
+```bash
+npm run lint
+```
+Runs ESLint with:
+- Recommended security rules
+- React best practices
+- Consistent import ordering
+- Accessibility checks (jsx-a11y)
+
+```bash
+npm run lint -- --fix  # Auto-fix fixable issues
+```
+
+### Pre-commit Automation  
+Both commands run automatically via Git hooks (Husky):
+1. Code formatting applied on staged files
+2. Lint checks block commits with errors
+3. Auto-fixes attempted before rejection
+
 
 ## Installation
 **Browser Bookmarklet:**
